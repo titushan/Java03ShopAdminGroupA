@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bwf.shop.admin.mapper.SpuAttrKeyMapper">
+    <select id="getAllSpuAttrKeyList" resultMap="spuattrkey">
+        select * from `spu_attr_key`
+        <where>
+            <if test="bo.key_name != null and bo.key_name.length != 0">
+                key_name like '%${bo.key_name}%'
+            </if>
+            <if test="bo.id != null and bo.id != 0">
+                and id = #{bo.id}
+            </if>
+        </where>
+        <choose>
+            <when test="  bo.start == null and  bo.length == null ">
+                limit 0,10
+            </when>
+            <when test=" bo.start == null and  bo.length != null  ">
+                limit 0,#{ bo.length }
+            </when>
+            <when test=" bo.start != null and  bo.length == null ">
+                limit #{ bo.start },10
+            </when>
+            <otherwise>
+                limit #{ bo.start },#{ bo.length }
+            </otherwise>
+        </choose>
+    </select>
+    <select id="getSpuAttrKeyCount" resultType="java.lang.Integer">
+        select count(*) from `spu_attr_key`
+        <where>
+            <if test="bo.key_name != null and bo.key_name.length != 0">
+                key_name like '%${bo.key_name}%'
+            </if>
+            <if test="bo.id != null and bo.id != 0">
+                and id = #{bo.id}
+            </if>
+        </where>
+    </select>
+
+    <delete id="delSpuAttrKeyOne">
+        delete from `spu_attr_key` where id = #{id}
+    </delete>
+    <delete id="delSpuAttrValueOne">
+        delete from `spu_attr_value` where value_attr_key_id = #{id}
+    </delete>
+    <delete id="delSpuAttrKeyMtu">
+        delete from `spu_attr_key` where id in
+        <foreach collection="checked" item="id" open="(-1," close=")" separator=",">
+            #{id}
+        </foreach>
+    </delete>
+    <delete id="delSpuAttrValueMtu">
+        delete from `spu_attr_value` where id in
+        <foreach collection="checked" item="id" open="(-1," close=")" separator=",">
+            #{id}
+        </foreach>
+    </delete>
+
+
+    <insert id="addSpuAttrKey" keyProperty="id" useGeneratedKeys="true">
+        insert into `spu_attr_key` ( key_name , createtime , updatetime)
+        values (  #{bo.key_name} , #{bo.createtime} , #{bo.updatetime} )
+    </insert>
+
+    <insert id="addSpuAttrValue">
+        insert into `spu_attr_value` (  value_name , createtime , updatetime , value_attr_key_id)
+        values (  #{vbo.value_name} , #{vbo.createtime} , #{vbo.updatetime} , #{kbo.id})
+    </insert>
+
+    <select id="getAllSpuAttrValueById" resultMap="SpuAttrValue">
+        select * from `spu_attr_value` where value_attr_key_id = #{id}
+    </select>
+    <update id="updateSpuAttrKeyById">
+        update `spu_attr_key`
+        <set>
+            <if test="bo.key_name != null and bo.key_name.length > 0">
+                key_name = #{bo.key_name}
+            </if>
+        </set>
+
+        where id = #{id}
+    </update>
+    <delete id="delSpuAttrValueById">
+        delete from `spu_attr_value` where id in
+        <foreach collection="checked" item="id" open="(-1," close=")" separator=",">
+            #{id}
+        </foreach>
+    </delete>
+
+    <delete id="delSpuSttrKeyCategoriesById">
+        delete from `spu_attr_key_categories` where spu_attr_key_id =#{id}
+    </delete>
+
+    <delete id="delSpuSttrKeyCategoriesMtu">
+        delete from `spu_attr_key_categories` where spu_attr_key_id in
+        <foreach collection="checked" item="id" open="(-1," close=")" separator=",">
+            #{id}
+        </foreach>
+    </delete>
+
+
+    <insert id="addSpuSttrKeyCategories" useGeneratedKeys="true" keyProperty="id">
+        insert into `spu_attr_key_categories` ( spu_attr_key_id , category_id ) values ( #{cbo.spu_attr_key_id} , #{cbo.category_id} )
+    </insert>
+
+
+
+    <select id="getIsExistByKeyName" resultType="java.lang.Integer">
+        select * from `spu_attr_key` where key_name = #{key_name}
+    </select>
+
+    <resultMap id="spuattrkey" type="com.bwf.shop.admin.bean.bo.SpuAttrKeySearch">
+        <id property="id" column="id"/>
+        <result property="key_name" column="key_name"/>
+        <result property="createtime" column="createtime"/>
+        <result property="updatetime" column="updatetime"/>
+    </resultMap>
+    <resultMap id="SpuAttrValue" type="com.bwf.shop.admin.bean.po.SpuAttrValue">
+        <id property="id" column="id"/>
+        <result property="value_name" column="value_name"/>
+    </resultMap>
+</mapper>

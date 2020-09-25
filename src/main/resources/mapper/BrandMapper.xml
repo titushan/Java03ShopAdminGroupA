@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bwf.shop.admin.mapper.BrandMapper">
+    <select id="getAllBrandList" resultMap="Brand">
+        select * from `brand`
+            <where>
+                <if test="bo.brand_name != null and bo.brand_name.length != 0">
+                    brand_name like '%${bo.brand_name}%'
+                </if>
+            </where>
+            <choose>
+                <when test="  bo.start == null and  bo.length == null ">
+                    limit 0,10
+                </when>
+                <when test=" bo.start == null and  bo.length != null  ">
+                    limit 0,#{ bo.length }
+                </when>
+                <when test=" bo.start != null and  bo.length == null ">
+                    limit #{ bo.start },10
+                </when>
+                <otherwise>
+                    limit #{ bo.start },#{ bo.length }
+                </otherwise>
+            </choose>
+    </select>
+    <delete id="deleteOne">
+        delete from `brand` where id = #{id}
+    </delete>
+    <delete id="deleteMtu">
+        delete from `brand` where id in
+            <foreach collection="checked" item="id" open="(-1," close=")" separator=",">
+                #{id}
+            </foreach>
+    </delete>
+    <select id="allTotal" resultType="java.lang.Integer">
+        select count(*) from `brand`
+    </select>
+    <select id="getOneBrandById" resultMap="Brand">
+        select * from `brand` where id = #{id}
+    </select>
+
+
+    <insert id="addBrand" keyProperty="id" useGeneratedKeys="true">
+        insert into `brand` (brand_name,brand_introduction,sortno, createtime ,updatetime , brand_logourl)
+        values ( #{bo.brand_name},#{bo.brand_introduction},#{bo.sortno},#{bo.createtime},#{bo.updatetime} ,#{bo.brand_logourl})
+
+    </insert>
+
+    <update id="updateBrandById">
+        update `brand`
+        <set>
+            <if test=" bo.brand_name != null and bo.brand_name.length >0">
+                brand_name = #{bo.brand_name},
+            </if>
+            <if test=" bo.brand_introduction != null and bo.brand_introduction.length >0 ">
+                brand_introduction = #{bo.brand_introduction},
+            </if>
+            <if test=" bo.brand_logourl != null and bo.brand_logourl.length >0 ">
+                brand_logourl = #{bo.brand_logourl},
+            </if>
+            <if test="bo.sortno != null">
+                sortno = #{bo.sortno},
+            </if>
+            <if test="bo.updatetime">
+                updatetime = #{bo.updatetime},
+            </if>
+        </set>
+        where id = #{ id }
+    </update>
+
+
+    <select id="getBrandByName" resultMap="brand_name">
+        select * from `brand`
+    </select>
+
+    <resultMap id="Brand" type="com.bwf.shop.admin.bean.po.Brand">
+        <id property="id" column="id"></id>
+        <result property="brand_name" column="brand_name"/>
+        <result property="brand_introduction" column="brand_introduction"/>
+        <result property="brand_logourl" column="brand_logourl"/>
+        <result property="sortno" column="sortno"/>
+        <result property="createtime" column="createtime"/>
+        <result property="updatetime" column="updatetime"/>
+    </resultMap>
+
+    <resultMap id="brand_name" type="com.bwf.shop.admin.bean.po.Brand">
+        <id property="id" column="id"/>
+        <result property="brand_name" column="brand_name"/>
+    </resultMap>
+
+
+</mapper>

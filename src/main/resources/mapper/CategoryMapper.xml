@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bwf.shop.admin.mapper.CategoryMapper">
+    <select id="getAllCategoryListByParentId" resultMap="Category">
+        select * from `category`
+            <where>
+                <choose>
+                    <when test="parent_id == null ">
+                        parent_id is null
+                    </when>
+                    <otherwise>
+                        parent_id = #{parent_id}
+                    </otherwise>
+                </choose>
+            </where>
+    </select>
+
+
+
+    <select id="getAllCategoryList" resultMap="AllCategory">
+        select * from `category`
+        <where>
+            <if test="bo.cate_name != null and bo.cate_name.length != 0">
+                cate_name like '%${bo.cate_name}%'
+            </if>
+            <if test="bo.id != null and bo.id != 0">
+                and id = #{bo.id}
+            </if>
+            <if test="bo.parent_id != null and bo.parent_id != -1">
+                and parent_id = #{ bo.parent_id }
+            </if>
+        </where>
+        <choose>
+            <when test="  bo.start == null and  bo.length == null ">
+                limit 0,10
+            </when>
+            <when test=" bo.start == null and  bo.length != null  ">
+                limit 0,#{ bo.length }
+            </when>
+            <when test=" bo.start != null and  bo.length == null ">
+                limit #{ bo.start },10
+            </when>
+            <otherwise>
+                limit #{ bo.start },#{ bo.length }
+            </otherwise>
+        </choose>
+    </select>
+
+    <select id="getCategoryCount" resultType="java.lang.Integer">
+        select count(*) from `category`
+        <where>
+            <if test="bo.cate_name != null and bo.cate_name.length != 0">
+                cate_name like '%${bo.cate_name}%'
+            </if>
+            <if test="bo.id != null and bo.id != 0">
+                and id = #{bo.id}
+            </if>
+            <if test="bo.parent_id != null and bo.parent_id != -1">
+                and parent_id = #{ bo.parent_id }
+            </if>
+        </where>
+    </select>
+    <delete id="delCategoryById">
+        delete from `category` where id = #{id}
+    </delete>
+
+    <delete id="delCategoryMtu">
+        delete from `category` where id in
+        <foreach collection="checked" item="id" open="(-1," close=")" separator=",">
+            #{id}
+        </foreach>
+    </delete>
+     <insert id="addCategory" keyProperty="id" useGeneratedKeys="true">
+        insert into `category` (cate_name,cate_sort,createtime,parent_id)
+        values ( #{bo.cate_name},#{bo.cate_sort},#{bo.createtime},#{bo.parent_id})
+    </insert>
+    <insert id="addBrandCategory" >
+        insert into `brand_categories` (brand_id , category_id) values
+
+        <foreach collection="brand_id" item="b" separator=",">
+            (#{b},#{bo.id})
+        </foreach>
+
+    </insert>
+    
+    <update id="updateCateGoryById" >
+        update `category`
+        <set>
+            <if test="bo.cate_name!=null and bo.cate_name.length > 0">
+                cate_name = #{bo.cate_name}
+            </if>
+            <if test=" bo.cate_sort !=null ">
+                cate_sort = #{bo.cate_sort}
+            </if>
+            <if test="bo.parent_id != null and bo.parent_id != -1">
+                parent_id = #{bo.parent_id}
+            </if>
+        </set>
+
+        where id = #{ bo.id }
+    </update>
+
+    <select id="getCategoryAndBrandByCategoryId" resultMap="brandcate">
+        select * from `brand_categories` where category_id = #{ id }
+    </select>
+
+
+    <delete id="delCategoryAndBrandById">
+        delete from `brand_categories` where id = #{id}
+    </delete>
+
+    <insert id="updateCategoryAndBrand">
+        insert into `brand_categories`
+           ( category_id , brand_id)
+        values (#{category_id},#{brand_id})
+    </insert>
+
+    <select id="getCategoryByName" resultType="java.lang.Integer">
+        select * from `category` where cate_name = #{cate_name}
+    </select>
+    <delete id="delBrandCategoryById">
+        delete  from `brand_categories` where category_id = #{id}
+    </delete>
+    <delete id="delBrandCategoryMTU">
+        delete from `brand_categories` where category_id in
+        <foreach collection="checked" item="id" open="(-1," close=")" separator=",">
+            #{id}
+        </foreach>
+    </delete>
+    <delete id="delSpuAttrKeyCategoryById">
+        delete  from `spu_attr_key_categories` where category_id = #{id}
+    </delete>
+    <delete id="delSpuAttrKeyCategories">
+        delete from `spu_attr_key_categories` where category_id in
+        <foreach collection="checked" item="id" open="(-1," close=")" separator=",">
+            #{id}
+        </foreach>
+    </delete>
+
+    
+    <resultMap id="Category" type="com.bwf.shop.admin.bean.po.Category">
+        <id property="id" column="id"></id>
+        <result property="cate_name" column="cate_name"/>
+        <result property="cate_sort" column="cate_sort"/>
+        <result property="createtime" column="createtime"/>
+        <result property="updatetime" column="updatetime"/>
+        <result property="parent_id" column="parent_id"/>
+    </resultMap>
+
+    <resultMap id="AllCategory" type="com.bwf.shop.admin.bean.po.Category">
+        <id property="id" column="id"></id>
+        <result property="cate_name" column="cate_name"/>
+        <result property="cate_sort" column="cate_sort"/>
+        <result property="createtime" column="createtime"/>
+        <result property="updatetime" column="updatetime"/>
+        <result property="parent_id" column="parent_id"/>
+    </resultMap>
+
+
+    <resultMap id="brandcate" type="com.bwf.shop.admin.bean.po.BrandCategories">
+        <id property="id" column="id"></id>
+        <result property="brand_id" column="brand_id"/>
+        <result property="category_id" column="category_id"/>
+    </resultMap>
+
+
+</mapper>
