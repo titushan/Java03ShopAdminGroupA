@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>品牌添加</title>
+    <link rel="stylesheet" th:href="@{/css/bootstrap4.min.css}" />
+    <link rel="stylesheet" th:href="@{/css/animate.min.css}" />
+    <script type="text/javascript" th:src="@{/js/jquery.min.js}" ></script>
+    <script type="text/javascript" th:src="@{/js/bootstrap4.min.js}" ></script>
+    <script type="text/javascript" th:src="@{/js/wow.js}" ></script>
+</head>
+<body>
+    <div class="container-fluid mt-3">
+        <form th:action="@{/brand/save}" method="POST" enctype="multipart/form-data" name="form1">
+            <div class="input-group">
+                <div class="input-group-prepend">
+                    <div class="input-group-text">商品名：</div>
+                </div>
+                <input type="text" name="brand_name" class="form-control" placeholder="请输入品牌名"/>
+                <div class="my-1 pl-3"></div>
+            </div>
+
+            <div class="input-group mt-1">
+                <div class="input-group-prepend">
+                    <div class="input-group-text">商品简介：</div>
+                </div>
+            <textarea name="brand_introduction" class="form-control" placeholder="请输入品牌简介"></textarea>
+            </div>
+
+            <div class="input-group">
+                <div class="input-group-prepend">
+                    <div class="input-group-text">商品LOGO：</div>
+                </div>
+                <input type="file" name="brand_logourl_img" class="form-control" placeholder="请导入品牌LOGO图片"/>
+            </div>
+
+            <div class="input-group">
+                <div class="input-group-prepend">
+                    <div class="input-group-text">品牌排序：</div>
+                </div>
+                <input type="text" name="sortno" class="form-control" placeholder="请输入品牌排序"/>
+            </div>
+
+            <div class="input-group">
+                <div class="input-group-prepend">
+                    <div class="input-group-text">品牌分类：</div>
+                </div>
+                <select class="form-control cate1">
+                    <option value="-1">---选择一级分类---</option>
+                    <option th:each="c1:${categoryList1}" th:value="${c1.id}" th:text="${c1.cate_name}">---选择一级分类---</option>
+                </select>
+
+                <select class="form-control cate2" name="category_id">
+                    <option value="-1">---选择二级分类---</option>
+
+                </select>
+
+            </div>
+            <div>
+                <button class="btn btn-primary" name="add" type="button">添加</button>
+            </div>
+        </form>
+    </div>
+
+
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        var context=/*[[@{/}]]*/;
+        /*]]>*/
+    </script>
+
+    <script>
+        $(document).ready( function (){
+            $("input[name=brand_name]").change( function(){
+             let  name = $(this).val();
+             let flag = false;
+                $.ajax({
+                    url : context + "brand/getBrandByName",
+                    type : "GET",
+                    success : function( response ){
+                        for(let c of JSON.parse(response)){
+                            if(c.brand_name == name){
+
+                                 $("input[name=brand_name]").next("div").html("<font color='red'>品牌已存在！</font>");
+                                flag =true;
+                                break;
+                            }
+                        }
+                        if( flag == false ){
+                              $("input[name=brand_name]").next("div").html("<font color='green'>品牌可以添加！</font>");
+                        }
+
+
+                    }
+                });
+            });
+
+
+            $(".cate1").change( function(){
+                let parent_id = $(this).val();
+                $.ajax({
+                    url : context + "brand/getAllCategoryListByParentId",
+                    type : "GET",
+                    data : {"parent_id":parent_id},
+                    success : function( response ){
+                     $(".cate2").empty();
+                        for( let c of JSON.parse(response) ){
+                            $(".cate2").get(0).options.add( new Option(c.cate_name , c.id) );
+                        }
+                    }
+
+                });
+            });
+
+
+
+            $("button[name=add]").click( function(){
+                console.log($("input[name=brand_logourl_img]").val())
+                if($("input[name=brand_logourl_img]").val() == "" || $("input[name=brand_name]").val() == "" ){
+                    if( $("input[name=brand_name]").val() == ""  ){
+                        alert("请填写品牌名字！");
+                        return ;
+                    }
+                    if( $("input[name=brand_logourl_img]").val() == ""  ){
+                        alert("请上传图片！");
+                         return ;
+                    }
+                }else{
+                form1.submit();
+                }
+            });
+
+
+        });
+    </script>
+</body>
+</html>

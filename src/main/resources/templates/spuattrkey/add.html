@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>属性添加</title>
+    <link rel="stylesheet" th:href="@{/css/bootstrap4.min.css}" />
+    <link rel="stylesheet" th:href="@{/css/animate.min.css}" />
+    <script type="text/javascript" th:src="@{/js/jquery.min.js}" ></script>
+    <script type="text/javascript" th:src="@{/js/bootstrap4.min.js}" ></script>
+    <script type="text/javascript" th:src="@{/js/wow.js}" ></script>
+    <style>
+
+    </style>
+</head>
+<body>
+<div class="container-fluid mt-3">
+    <form th:action="@{/spuattrkey/save}" method="POST" name="form1">
+       <div class="clon">
+           <div class="input-group mt-2">
+               <div class="input-group-prepend">
+                   <div class="input-group-text">属性名：</div>
+               </div>
+               <input type="text" name="key_name" class="form-control" placeholder="请输入属性名"/>
+               <div></div>
+               <div class="input-group-append">
+                   <button class="btn btn-primary" type="button" id="addValue">+</button>
+               </div>
+           </div>
+           <div class="input-group mt-1 value_name " id="0">
+               <div class="input-group-prepend">
+               </div>
+               <input type="text" name="value_name" class="form-control" placeholder="请输入属性值"/>
+           </div>
+           <div class="input-group">
+               <div class="input-group-prepend">
+                   <div class="input-group-text">品牌分类：</div>
+               </div>
+               <select class="form-control cate1">
+                   <option value="-1">---选择一级分类---</option>
+                   <option th:each="c1:${categoryByParentIdList}" th:value="${c1.id}" th:text="${c1.cate_name}">---选择一级分类---</option>
+               </select>
+
+               <select class="form-control cate2" name="category_id">
+                   <option value="-1">---选择二级分类---</option>
+
+               </select>
+
+           </div>
+       </div>
+
+
+        <div class="mt-3">
+            <button class="btn btn-primary" type="button" name="add">添加</button>
+        </div>
+    </form>
+</div>
+
+
+<script th:inline="javascript">
+        /*<![CDATA[*/
+        var context=/*[[@{/}]]*/;
+        /*]]>*/
+    </script>
+
+<script>
+
+    $(document).ready(function(){
+
+        $("#addValue").click( function(){
+            $(".value_name[id=0]").clone( true ).appendTo($(".clon"));
+            $(".value_name").last().attr("id" , $(".value_name").size()-1)
+        });
+
+        $(".cate1").change( function(){
+                let parent_id = $(this).val();
+                $.ajax({
+                    url : context + "brand/getAllCategoryListByParentId",
+                    type : "GET",
+                    data : {"parent_id":parent_id},
+
+                    success : function( response ){
+                     $(".cate2").empty();
+                        for( let c of JSON.parse(response) ){
+                            $(".cate2").get(0).options.add( new Option(c.cate_name , c.id) );
+                        }
+                    }
+
+                });
+            });
+
+            $("input[name=key_name]").change( function(){
+                let key_name = $(this).val();
+                $.ajax({
+                    url : context + "spuattrkey/getIsExistByKeyName",
+                    action : "POST",
+                    data : { "key_name" : key_name},
+                    success : function( response ){
+                        let a = JSON.parse(response);
+                        if(a!=0){
+                            $("input[name=key_name]").next("div").html("<font color='red'>属性已存在！</font>");
+                        }else{
+                            $("input[name=key_name]").next("div").html("<font color='green'>属性可以添加！</font>");
+                        }
+                    }
+                });
+            });
+
+
+            $("button[name=add]").click( function(){
+                if( $("input[name=key_name]").val() == "" || $("select[name=category_id]").children().val() == -1){
+                    if($("input[name=key_name]").val() == ""){
+                         alert("请填写属性名字！");
+                         return ;
+                    }else{
+                        alert("请选择属性分类！");
+                         return ;
+                    }
+
+                }else{
+                    form1.submit();
+                }
+            });
+    });
+
+</script>
+</body>
+</html>

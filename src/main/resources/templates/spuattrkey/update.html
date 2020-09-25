@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>分类修改</title>
+    <link rel="stylesheet" th:href="@{/css/bootstrap4.min.css}" />
+    <link rel="stylesheet" th:href="@{/css/animate.min.css}" />
+    <script type="text/javascript" th:src="@{/js/jquery.min.js}" ></script>
+    <script type="text/javascript" th:src="@{/js/bootstrap4.min.js}" ></script>
+    <script type="text/javascript" th:src="@{/js/wow.js}" ></script>
+
+</head>
+<body>
+<div class="container-fluid mt-3">
+    <form th:action="@{/spuattrkey/alter}" method="POST" name="form1">
+        <div class=" value_name ">
+            <div class="input-group mt-2">
+                <div class="input-group-prepend">
+                    <div class="input-group-text">属性ID：</div>
+                </div>
+                <input type="text" name="id" class="form-control" readonly/>
+            </div>
+            <div class="input-group mt-2">
+                <div class="input-group-prepend">
+                    <div class="input-group-text">属性名：</div>
+                </div>
+                <input type="text" name="key_name" class="form-control"/>
+
+            </div>
+
+            <div class="input-group mt-2">
+                <div class="input-group-prepend">
+                    <div class="input-group-text">已有属性：</div>
+                </div>
+                <div th:each="s :${ spuAttrValueList}">
+                    <input type="checkbox" th:text="${s.value_name}" class="ml-1" th:value="${s.id}" name="checked">
+                </div>
+                <div class="input-group-append " >
+                    <button class="btn btn-primary float-right" type="button" id="delValue">-</button>
+                </div>
+            </div>
+
+            <button class="btn btn-primary" type="button" id="addValue">添加属性值</button>
+            <div>
+                <input type="text" name="value_name" class="form-control" placeholder="请输入要添加的属性值" id="0"/>
+            </div>
+        </div>
+
+        <div>
+            <button class="btn btn-primary">修改</button>
+        </div>
+    </form>
+</div>
+
+
+<script th:inline="javascript">
+        /*<![CDATA[*/
+        var context=/*[[@{/}]]*/;
+        /*]]>*/
+    </script>
+
+<script type="text/javascript">
+
+$(document).ready( function(){
+   var a=GetRequest();
+    console.log("id:"+a['id']) //打印出传过来的id
+    function GetRequest() {
+    var url = location.search; //获取url中"?"符后的字串
+    var theRequest = new Object();
+    if (url.indexOf("?") != -1) {
+       var str = url.substr(1);
+       strs = str.split("&");
+       for (var i = 0; i < strs.length; i++) {
+           theRequest[strs[i].split("=")[0]] = decodeURIComponent(strs[i].split("=")[1]);
+       }
+   }
+   return theRequest;
+}
+$("input[name=id]").attr("value" , a['id']);
+
+ $("#addValue").click( function(){
+            $(".value_name[id=0]").clone( true ).appendTo($(".clon"));
+            $(".value_name").last().attr("id" , $(".value_name").size()-1)
+
+ });
+ $("#delValue").click( function(){
+    form1.submit();
+ });
+
+ $("#addValue").click( function(){
+    $("input[id=0]").clone(true).appendTo(".value_name");
+    $("input[id=0]").last().attr( "id" , $("input[name=value_name]").size()-1);
+
+ });
+});
+
+
+</script>
+</body>
+</html>

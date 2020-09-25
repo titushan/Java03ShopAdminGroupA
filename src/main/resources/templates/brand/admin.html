@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>品牌管理</title>
+    <link rel="stylesheet" th:href="@{/css/bootstrap4.min.css}" />
+    <link rel="stylesheet" th:href="@{/css/animate.min.css}" />
+    <script type="text/javascript" th:src="@{/js/jquery.min.js}" ></script>
+    <script type="text/javascript" th:src="@{/js/bootstrap4.min.js}" ></script>
+    <script type="text/javascript" th:src="@{/js/wow.js}" ></script>
+</head>
+<body>
+
+    <form th:action="@{/brand/admin}" method="POST" name="form1">
+        <div class="row mt-2">
+            <div class="col-6 col-sm-4 col-md-3" >
+                <input type="text" placeholder="请输入要查找的品牌名" name="brand_name" class="form-control mt-2 container" th:value="${bo.brand_name}">
+            </div>
+            <div class="col-6 col-sm-4 col-md-3" >
+                <input type="hidden" name="start" class="form-control mt-2 container" th:value="${bo.start}">
+            </div>
+            <div class="col-6 col-sm-4 col-md-3" >
+                <input type="hidden"  name="length" class="form-control mt-2 container" th:value="${bo.length}">
+            </div>
+        </div>
+        <div class="col-6 col-sm-4 col-md-3">
+            <button class="btn btn-primary mt-1 form-control btn-sm">搜索</button>
+        </div>
+
+    </form>
+    <div class="container-fluid mt-2">
+        <div class="panel-heading">
+
+            <div class="btn-group" align="right">
+
+                <button class="btn btn-button btn-primary mt-2 ml-1" name="add_brand">
+                    <img th:src="@{/img/plus.png}" height="28px"/>
+                    &nbsp;&nbsp;添加数据
+                </button>
+            </div>
+        </div>
+
+            <form th:action="@{/brand/delete}" method="POST" >
+                <table class="table table-bordered table-striped table-lg mt-3" align="center">
+                    <thead>
+                    <tr>
+                        <td><input type="checkbox" id="checkedAll"></td>
+                        <th>品牌编号</th>
+                        <th>品牌名</th>
+                        <th>品牌logo</th>
+                        <th>品牌排序</th>
+                        <th>创建时间</th>
+                        <th>更新时间</th>
+                        <th>操作</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="brand : ${brandList}" >
+                        <td> <input type="checkbox" name="checked" th:value="${brand.id}"> </td>
+                        <td th:text="${brand.id}"></td>
+                        <td th:text="${brand.brand_name}"></td>
+                        <td><img th:src="@{ '/img/' + ${brand.brand_logourl}}" width="80px" height="35px"/></td>
+                        <td th:text="${brand.sortno}"></td>
+                        <td th:text="${#dates.format(brand.createtime, 'yyyy-MM-dd HH:mm:ss')}"></td>
+                        <td th:text="${#dates.format(brand.updatetime, 'yyyy-MM-dd HH:mm:ss')}"></td>
+                        <td><a class="btn btn-button btn-primary" th:href="@{'/brand/update?id=' + ${brand.id}}" >编辑</a>
+                            <a class="btn btn-button btn-danger" th:href="@{'/brand/delete?id=' + ${brand.id}}" name="del_single">删除</a>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+                <button class="btn btn-button btn-danger mt-2" type="button" name="del">
+                    <img th:src="@{/img/7.png}" height="28px"/>
+                    &nbsp;&nbsp;批量删除
+                </button>
+            </form>
+
+        <!--  分页控件  -->
+        <div class="row mt-2">
+            <div class="col-12 col-lg-6">
+                <div class="btn-group">
+                    <button class="btn btn-primary btn-first" th:disabled="${bo.start==0}">首页</button>
+                    <button class="btn btn-primary btn-prev" th:disabled="${bo.start==0}">上一页</button>
+                    <button class="btn btn-primary btn-next" th:disabled="${bo.start==(total-1)*bo.length}">下一页</button>
+                    <button class="btn btn-primary btn-last" th:disabled="${bo.start==(total-1)*bo.length}">末页</button>
+                </div>
+            </div>
+            <div class="col-6 col-lg-3">
+                <div class="input-group">
+                    <input type="text" name="current" class="form-control" th:value="${bo.start/bo.length+1}" dir="rtl"/>
+                    <div class="input-group-append">
+                        <span class="input-group-text"> / <span class="total" th:text="${total}"></span> 页 </span>
+                    </div>
+                    <div class="input-group-append">
+                        <button class="btn btn-primary btn-go"> Go </button>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-lg-3">
+                <select class="form-control pageSize" >
+                    <option value="5" th:selected="${bo.length==5}">每页显示5条记录</option>
+                    <option value="10" th:selected="${bo.length==10}">每页显示10条记录</option>
+                    <option value="20" th:selected="${bo.length==20}">每页显示20条记录</option>
+                    <option value="30" th:selected="${bo.length==30}">每页显示30条记录</option>
+                    <option value="50" th:selected="${bo.length==50}">每页显示50条记录</option>
+                </select>
+            </div>
+        </div>
+        <!--  /分页控件  -->
+    </div>
+
+
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        var context=/*[[@{/}]]*/;
+        /*]]>*/
+    </script>
+    <script>
+        $(document).ready(function(){
+         //分页操作
+            $(".btn-first").click(function(){
+                // 修改 当前显示的起始记录索引
+                $("input[name='start']").val( 0 );
+                // 提交表单
+                form1.submit();
+            });
+            $(".btn-prev").click(function(){
+                // 获取 每页显示的记录数
+                let length = parseInt( $("input[name='length']").val() );
+                // 获取 当前显示的起始记录索引
+                let start = parseInt( $("input[name='start']").val() );
+                // 修改 当前显示的起始记录索引
+                $("input[name='start']").val( start - length );
+                // 提交表单
+                form1.submit();
+            });
+            $(".btn-next").click(function(){
+                // 获取 每页显示的记录数
+                let length = parseInt( $("input[name='length']").val() );
+                // 获取 当前显示的起始记录索引
+                let start = parseInt( $("input[name='start']").val() );
+                // 修改 当前显示的起始记录索引
+                $("input[name='start']").val( start + length );
+                // 提交表单
+                form1.submit();
+            });
+            $(".btn-last").click(function(){
+                // 获取 每页显示的记录数
+                let length = parseInt( $("input[name='length']").val() );
+                // 获取 总页数
+                let total = parseInt( $(".total").text() );
+                // 修改 当前显示的起始记录索引
+                $("input[name='start']").val( (total - 1) * length );
+                // 提交表单
+                form1.submit();
+            });
+            $(".btn-go").click(function(){
+                // 获取 当前用户输入的要跳转的页码
+                let page = parseInt( $("input[name='current']").val() );
+                // 获取 每页显示的记录数
+                let length = parseInt( $("input[name='length']").val() );
+                // 修改 当前显示的起始记录索引
+                $("input[name='start']").val( (page - 1) * length );
+                // 提交表单
+                form1.submit();
+            });
+            $(".pageSize").change(function(){
+                // 修改 每页显示的记录数
+                $("input[name='length']").val( $(this).val() );
+                // 提交表单
+                form1.submit();
+            });
+
+
+           //点击添加按钮跳转添加页面
+           $("button[name=add_brand]").click( function(){
+
+                location.href = context + "brand/add";
+           });
+
+
+           //点击按钮跳转更新页面
+            $("button[name=brand_update]").click( function(){
+                location.href = context + "brand/update";
+           });
+
+
+            $("a[name=del_single]").click( function(){
+                if(!confirm("您确定要删除吗？")){
+                    return false;
+                }
+            });
+
+           //点击批量删除
+           $("button[name=del]").click( function(){
+                if($("input[checked=checked]").size() == 0 ){
+                    confirm("请选择要删除的选项");
+                    return;
+                }else{
+                  if( $("#checkedAll").prop("checked")==true ){
+
+                    if(confirm("您确定要全部删除吗？")){
+                        $("input[name=checked]").each(function(index,dom){
+                            form1.submit();
+                        });
+
+                    }
+                   }
+
+                  else if(confirm("您确定要删除选中项吗？")){
+                    $("input[name=checked]").each(function(index,dom){
+                        if($(this).prop("checked") == true)
+                            form1.submit();
+                    });
+                }
+                }
+           });
+
+
+           //全选和单选
+           $("#checkedAll").click( function(){
+               $("input[name=checked]").prop("checked" , $(this).prop("checked"));
+            });
+
+
+           $("input[name=checked]").click( function(){
+                let flag = 0;
+                $("input[name=checked]").each(function(index,dom){
+                    if( $(this).prop("checked") == false){
+                        flag = 1;
+                        $("#checkedAll").prop("checked",false);
+                        return;
+                    }
+
+                });
+                if(flag == 0){
+                    $("#checkedAll").prop("checked",true);
+                }
+           });
+        });
+    </script>
+</body>
+</html>

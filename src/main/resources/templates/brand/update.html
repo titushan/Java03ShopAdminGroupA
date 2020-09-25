@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>品牌修改</title>
+    <link rel="stylesheet" th:href="@{/css/bootstrap4.min.css}" />
+    <link rel="stylesheet" th:href="@{/css/animate.min.css}" />
+    <script type="text/javascript" th:src="@{/js/jquery.min.js}" ></script>
+    <script type="text/javascript" th:src="@{/js/bootstrap4.min.js}" ></script>
+    <script type="text/javascript" th:src="@{/js/wow.js}" ></script>
+</head>
+<body>
+<div class="container-fluid mt-3">
+    <form th:action="@{/brand/alter}" method="POST" enctype="multipart/form-data">
+        <div class="input-group">
+            <div class="input-group-prepend">
+                <div class="input-group-text">品牌ID：</div>
+            </div>
+            <input type="text" name="id" class="form-control"  readonly/>
+        </div>
+        <div class="input-group">
+            <div class="input-group-prepend">
+                <div class="input-group-text">品牌名：</div>
+            </div>
+            <input type="text" name="brand_name" class="form-control"  />
+        </div>
+
+        <div class="input-group mt-1">
+            <div class="input-group-prepend">
+                <div class="input-group-text">品牌简介：</div>
+            </div>
+            <textarea name="brand_introduction" class="form-control"  ></textarea>
+        </div>
+
+        <div class="input-group">
+            <div class="input-group-prepend">
+                <div class="input-group-text">品牌LOGO：</div>
+            </div>
+            <input type="file" name="brand_logourl_img" class="form-control" />
+        </div>
+
+        <div class="input-group">
+            <div class="input-group-prepend">
+                <div class="input-group-text">品牌排序：</div>
+            </div>
+            <input type="text" name="sortno" class="form-control" />
+        </div>
+
+        <div class="input-group">
+            <div class="input-group-prepend">
+                <div class="input-group-text">品牌分类：</div>
+            </div>
+            <select class="form-control cate1">
+                <option value="-1">---选择一级分类---</option>
+                <option th:each="c1:${categoryList1}" th:value="${c1.id}" th:text="${c1.cate_name}">---选择一级分类---</option>
+            </select>
+
+            <select class="form-control cate2" name="category_id">
+                <option value="-1" >---选择二级分类---</option>
+
+            </select>
+
+        </div>
+        <div>
+            <button class="btn btn-primary"  name="add">添加</button>
+        </div>
+    </form>
+</div>
+
+
+<script th:inline="javascript">
+        /*<![CDATA[*/
+        var context=/*[[@{/}]]*/;
+        /*]]>*/
+    </script>
+
+<script>
+        $(document).ready( function (){
+
+
+
+            $(".cate1").change( function(){
+                let parent_id = $(this).val();
+                $.ajax({
+                    url : context + "brand/getAllCategoryListByParentId",
+                    type : "GET",
+                    data : {"parent_id":parent_id},
+
+                    success : function( response ){
+                     $(".cate2").empty();
+                        for( let c of JSON.parse(response) ){
+                            $(".cate2").get(0).options.add( new Option(c.cate_name , c.id) );
+                        }
+                    }
+
+                });
+            });
+
+        });
+    </script>
+<script type="text/javascript">
+
+$(document).ready( function(){
+   var a=GetRequest();
+    console.log("id:"+a['id']) //打印出传过来的id
+    function GetRequest() {
+    var url = location.search; //获取url中"?"符后的字串
+    var theRequest = new Object();
+    if (url.indexOf("?") != -1) {
+       var str = url.substr(1);
+       strs = str.split("&");
+       for (var i = 0; i < strs.length; i++) {
+           theRequest[strs[i].split("=")[0]] = decodeURIComponent(strs[i].split("=")[1]);
+       }
+   }
+   return theRequest;
+}
+$("input[name=id]").attr("value" , a['id'])
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>分类添加</title>
+    <link rel="stylesheet" th:href="@{/css/bootstrap4.min.css}" />
+    <link rel="stylesheet" th:href="@{/css/animate.min.css}" />
+    <script type="text/javascript" th:src="@{/js/jquery.min.js}" ></script>
+    <script type="text/javascript" th:src="@{/js/bootstrap4.min.js}" ></script>
+    <script type="text/javascript" th:src="@{/js/wow.js}" ></script>
+    <style>
+
+    </style>
+</head>
+<body>
+<div class="container-fluid mt-3">
+    <form th:action="@{/category/save}" method="POST" name="form1">
+        <div class="input-group mt-2">
+            <div class="input-group-prepend">
+                <div class="input-group-text">分类名：</div>
+            </div>
+            <input type="text" name="cate_name" class="form-control" placeholder="请输入分类名"/>
+            <div></div>
+        </div>
+
+        <div class="input-group mt-2">
+            <div class="input-group-prepend">
+                <div class="input-group-text">分类排序：</div>
+            </div>
+            <input type="text" name="cate_sort" class="form-control" placeholder="请输入分类排序"/>
+        </div>
+
+        <div class="input-group mt-2">
+            <div class="input-group-prepend">
+                <div class="input-group-text">品牌分类：</div>
+            </div>
+            <select class="form-control cate1" name="parent_id">
+                <option value="-1">---选择一级分类---</option>
+                <option th:each="c1:${categoryByParentIdList}" th:value="${c1.id}" th:text="${c1.cate_name}"></option>
+            </select>
+
+            <div class="input-group mt-2">
+                <div class="input-group-prepend">
+                    <div class="input-group-text">品牌：</div>
+                </div>
+                    <input type="checkbox" name="brand_id" th:each="b : ${brandList}"
+                           th:value="${b.id}"  th:text="${b.brand_name}"
+                    class="ml-3 mt-2"/>
+            </div>
+
+
+        </div>
+        <div>
+            <button class="btn btn-primary" type="button" name="add">添加</button>
+        </div>
+    </form>
+</div>
+
+
+<script th:inline="javascript">
+        /*<![CDATA[*/
+        var context=/*[[@{/}]]*/;
+        /*]]>*/
+    </script>
+
+<script>
+    $(document).ready( function(){
+         $("button[name=add]").click( function(){
+         alert($("select[name=parent_id]").val())
+                if( $("input[name=cate_name]").val() == "" || ($("select[name=parent_id]").val() == -1)){
+                    if( $("input[name=cate_name]").val() == "" ){
+                        alert("请填写分类名字！");
+                        return ;
+                    }else if ($("select[name=parent_id]").val() == -1){
+                        alert("请选择分类！");
+                        return ;
+                    }
+
+                }else{
+                    form1.submit();
+                }
+            });
+
+
+           $("input[name=cate_name]").change(function(){
+              let cate_name = $(this).val();
+              $("input[name=cate_name]").next("div").html("");
+              $.ajax( {
+                url : context + "category/getCategoryByName",
+                action : "GET",
+                data : {"cate_name" : cate_name},
+                success : function( response ){
+                    let a = JSON.parse( response );
+                    if(a!=0){
+                            $("input[name=cate_name]").next("div").html("<font color='red'>分类已存在！</font>");
+                        }else{
+                            $("input[name=cate_name]").next("div").html("<font color='green'>分类可以添加！</font>");
+                        }
+                },
+                error : function(response){
+                let a = JSON.parse( response );
+                    alert(a);
+                }
+            });
+           });
+    });
+
+
+    </script>
+</body>
+</html>

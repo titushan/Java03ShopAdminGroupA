@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>分类修改</title>
+    <link rel="stylesheet" th:href="@{/css/bootstrap4.min.css}" />
+    <link rel="stylesheet" th:href="@{/css/animate.min.css}" />
+    <script type="text/javascript" th:src="@{/js/jquery.min.js}" ></script>
+    <script type="text/javascript" th:src="@{/js/bootstrap4.min.js}" ></script>
+    <script type="text/javascript" th:src="@{/js/wow.js}" ></script>
+    <style>
+
+    </style>
+</head>
+<body>
+<div class="container-fluid mt-3">
+    <form th:action="@{/category/alter}" method="POST">
+        <div class="input-group mt-2">
+            <div class="input-group-prepend">
+                <div class="input-group-text">分类ID：</div>
+            </div>
+            <input type="text" name="id" class="form-control" readonly />
+        </div>
+        <div class="input-group mt-2">
+            <div class="input-group-prepend">
+                <div class="input-group-text">分类名：</div>
+            </div>
+            <input type="text" name="cate_name" class="form-control" placeholder="请输入品牌名"/>
+        </div>
+
+        <div class="input-group mt-2">
+            <div class="input-group-prepend">
+                <div class="input-group-text">分类排序：</div>
+            </div>
+            <input type="text" name="cate_sort" class="form-control" placeholder="请输入品牌排序"/>
+        </div>
+
+        <div class="input-group mt-2">
+            <div class="input-group-prepend">
+                <div class="input-group-text">品牌分类：</div>
+            </div>
+            <select class="form-control cate1" name="parent_id">
+                <option value="-1">---选择一级分类---</option>
+                <option th:each="c1:${categoryByParentIdList}" th:value="${c1.id}" th:text="${c1.cate_name}"></option>
+            </select>
+
+            <div class="input-group mt-2">
+                <div class="input-group-prepend">
+                    <div class="input-group-text">品牌：</div>
+                </div>
+                <input type="checkbox" name="brand_id" th:each="b : ${brandList}"
+                       th:value="${b.id}"  th:text="${b.brand_name}"
+                       class="ml-3 mt-2"/>
+            </div>
+
+
+        </div>
+        <div>
+            <button class="btn btn-primary">修改</button>
+        </div>
+    </form>
+</div>
+
+
+<script th:inline="javascript">
+        /*<![CDATA[*/
+        var context=/*[[@{/}]]*/;
+        /*]]>*/
+    </script>
+
+<script type="text/javascript">
+
+$(document).ready( function(){
+   var a=GetRequest();
+    console.log("id:"+a['id']) //打印出传过来的id
+    function GetRequest() {
+    var url = location.search; //获取url中"?"符后的字串
+    var theRequest = new Object();
+    if (url.indexOf("?") != -1) {
+       var str = url.substr(1);
+       strs = str.split("&");
+       for (var i = 0; i < strs.length; i++) {
+           theRequest[strs[i].split("=")[0]] = decodeURIComponent(strs[i].split("=")[1]);
+       }
+   }
+   return theRequest;
+}
+$("input[name=id]").attr("value" , a['id'])
+});
+</script>
+</body>
+</html>
